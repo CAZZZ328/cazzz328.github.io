@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>隨機四位碼生成器</title>
     <!-- Google AdSense 主要載入腳本 -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4726297202613314"
-            crossorigin="anonymous"></script>
+    <!-- 移除 AdSense 主腳本，因為不再有廣告區塊 -->
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4726297202613314"
+            crossorigin="anonymous"></script> -->
     <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 載入 Google Fonts - Inter -->
@@ -103,7 +104,7 @@
                         )}
 
                         {/* 免責聲明 - 極度顯眼且措辭嚴謹 */}
-                        <p className="text-lg font-extrabold text-red-700 mt-4 italic leading-snug mb-6"> {/* 調整字體大小和行高 */}
+                        <p className="text-base font-bold text-red-700 mt-4 italic leading-snug mb-6"> {/* 調整字體大小和行高 */}
                             【重要聲明】本工具僅為**純粹娛樂性質**的隨機數字生成器，所提供的任何「四位碼」與「幸運數字」均為**電腦隨機產生**，**不具有任何實際意義、預測功能或關聯性**。請勿將此隨機數字用於任何實際用途或決策。
                         </p>
 
@@ -111,7 +112,6 @@
                         <button
                             onClick={onTryAgain}
                             className="w-full py-3 px-6 rounded-md text-white font-bold text-lg
-                                       transition-all duration-300 ease-in-out
                                        bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:scale-95 hover:shadow-lg active:shadow-inner
                                        focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75"
                         >
@@ -182,89 +182,56 @@
             }, []);
 
             return (
-                // 主容器：使用 Grid 佈局來實現三欄（左右廣告/保留區塊 + 中間內容）
-                // 簡化背景顏色
+                // 主容器：使用 flex 佈局置中內容，不再需要 grid 佈局
                 <div className="min-h-screen bg-subtle-gradient flex justify-center items-center p-4 font-inter">
-                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(320px,500px)_1fr] gap-4 lg:gap-8 w-full max-w-screen-xl">
+                    {/* 中間主內容區塊 - 直接置中，不再依賴 grid */}
+                    <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8 max-w-md w-full text-center transform transition-shadow duration-300"> {/* 簡化陰影和邊框，移除 hover:scale-105 */}
+                        <h1 className="text-4xl font-extrabold text-gray-800 mb-6">
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700"> {/* 調整標題漸層 */}
+                                隨機四位碼生成器
+                            </span>
+                        </h1>
 
-                        {/* 左側廣告區塊 */}
-                        <div className="hidden lg:flex items-center justify-center bg-white rounded-lg shadow-md p-4 border border-gray-200 flex-col text-center"> {/* 簡化樣式 */}
-                            <p className="text-sm font-bold text-gray-700 mb-2">
-                                廣告區塊 (左)
-                            </p>
-                            {/* Google AdSense 廣告位 - 請在此處插入您的廣告代碼 */}
-                            <div className="w-full h-48 bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 text-xs flex-grow"> {/* 簡化佔位符樣式 */}
-                                <p>Google AdSense 廣告位</p>
+                        <p className="text-lg text-gray-600 mb-8">
+                            準備好迎接今天的隨機數字了嗎？點擊按鈕，讓程式為你揭示一個純粹隨機的四位碼！
+                        </p>
+
+                        {/* 初始提示或錯誤訊息 (當 Modal 未開啟且沒有生成數字時顯示) */}
+                        {!generatedCode && !loading && !error && !isModalOpen && (
+                            <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200 text-gray-600">
+                                <p>好奇心是探索數字的第一步！點擊按鈕，看看你今天的「隨機四位碼」是什麼？</p>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">
-                                點擊我，或許有驚喜！
-                            </p>
-                        </div>
-
-                        {/* 中間主內容區塊 */}
-                        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8 w-full text-center transform transition-shadow duration-300"> {/* 簡化陰影和邊框，移除 hover:scale-105 */}
-                            <h1 className="text-4xl font-extrabold text-gray-800 mb-6">
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700"> {/* 調整標題漸層 */}
-                                    隨機四位碼生成器
-                                </span>
-                            </h1>
-
-                            <p className="text-lg text-gray-600 mb-8">
-                                準備好迎接今天的隨機數字了嗎？點擊按鈕，讓程式為你揭示一個純粹隨機的四位碼！
-                            </p>
-
-                            {/* 初始提示或錯誤訊息 (當 Modal 未開啟且沒有生成數字時顯示) */}
-                            {!generatedCode && !loading && !error && !isModalOpen && (
-                                <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200 text-gray-600">
-                                    <p>好奇心是探索數字的第一步！點擊按鈕，看看你今天的「隨機四位碼」是什麼？</p>
-                                </div>
-                            )}
-                            {error && !isModalOpen && ( // 錯誤訊息只在 Modal 未開啟時顯示
-                                <div className="mb-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                                    <p className="font-semibold">錯誤：</p>
-                                    <p>{error}</p>
-                                </div>
-                            )}
-
-                            {/* 推薦按鈕 */}
-                            <button
-                                onClick={generateRandomCode}
-                                disabled={loading}
-                                className={`
-                                    w-full py-3 px-6 rounded-md text-white font-bold text-lg
-                                    transition-all duration-200 ease-in-out /* 加快過渡 */
-                                    ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:scale-98'} /* 簡化按鈕顏色和點擊效果 */
-                                    focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75
-                                `}
-                            >
-                                {loading ? (
-                                    <div className="flex items-center justify-center">
-                                        <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        載入中...
-                                    </div>
-                                ) : (
-                                    currentButtonText
-                                )}
-                            </button>
-                        </div>
-
-                        {/* 右側廣告區塊 */}
-                        <div className="hidden lg:flex items-center justify-center bg-white rounded-lg shadow-md p-4 border border-gray-200 flex-col text-center"> {/* 簡化樣式 */}
-                            <p className="text-sm font-bold text-gray-700 mb-2">
-                                廣告區塊 (右)
-                            </p>
-                            {/* Google AdSense 廣告位 - 請在此處插入您的廣告代碼 */}
-                            <div className="w-full h-48 bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 text-xs flex-grow"> {/* 簡化佔位符樣式 */}
-                                <p>Google AdSense 廣告位</p>
+                        )}
+                        {error && !isModalOpen && ( // 錯誤訊息只在 Modal 未開啟時顯示
+                            <div className="mb-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                <p className="font-semibold">錯誤：</p>
+                                <p>{error}</p>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2">
-                                更多機會，點擊發掘！
-                            </p>
-                        </div>
+                        )}
 
+                        {/* 推薦按鈕 */}
+                        <button
+                            onClick={generateRandomCode}
+                            disabled={loading}
+                            className={`
+                                w-full py-3 px-6 rounded-md text-white font-bold text-lg
+                                transition-all duration-200 ease-in-out
+                                ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:scale-95 hover:shadow-lg active:shadow-inner'} /* 加強按鈕點擊和懸停效果 */
+                                focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75
+                            `}
+                        >
+                            {loading ? (
+                                <div className="flex items-center justify-center">
+                                    <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    載入中...
+                                </div>
+                            ) : (
+                                currentButtonText
+                            )}
+                        </button>
                     </div>
                     {/* 渲染 Modal 彈出視窗 */}
                     <RecommendationModal
