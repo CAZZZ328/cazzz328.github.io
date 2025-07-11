@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機四位碼生成器</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- 載入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- 載入 Babel，用於在瀏覽器中轉換 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* 自定義 CSS 動畫 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* 簡化背景漸層 */
+        .bg-subtle-gradient {
+            background: linear-gradient(to bottom right, #e0f2fe, #e8eaf6); /* Light blue to light indigo */
+        }
+
+        /* 移除不必要的動畫 */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out forwards;
+        }
+
+        /* 簡化 pulse 動畫，如果需要 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; } /* 讓脈動效果更輕微 */
+        }
+        .animate-pulse {
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Modal 彈出視窗動畫 (保留，但確保數字本身無動畫) */
+        @keyframes modal-fade-in {
+            from { opacity: 0; transform: scale(0.95); } /* 稍微調整縮放 */
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes modal-fade-out {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+        .modal-enter-active {
+            animation: modal-fade-in 0.25s ease-out forwards; /* 加快動畫時間 */
+        }
+        .modal-exit-active {
+            animation: modal-fade-out 0.25s ease-in forwards; /* 加快動畫時間 */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // 在這裡解構 React 鉤子，讓它們在 App 組件中可用
+        const { useState, useEffect } = React;
+
+        // Modal 彈出視窗組件
+        function RecommendationModal({ isOpen, onClose, generatedCode, luckyNumber, onTryAgain }) {
+            if (!isOpen) return null; // 如果視窗未開啟，則不渲染
+
+            return (
+                // 遮罩層 (Modal 本身有進入動畫)
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-enter-active"> {/* 降低遮罩透明度 */}
+                    {/* 彈出視窗內容 */}
+                    <div className="bg-white rounded-lg shadow-xl p-8 max-w-lg w-full text-center relative border border-gray-300"> {/* 簡化邊框和陰影 */}
+                        {/* 關閉按鈕 */}
+                        <button
+                            onClick={onClose}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl font-bold transition-colors duration-200"
+                        >
+                            &times;
+                        </button>
+
+                        <h2 className="text-3xl font-bold text-gray-800 mb-4"> {/* 調整標題顏色 */}
+                            你的隨機四位碼是：
+                        </h2>
+                        {generatedCode && (
+                            <>
+                                {/* 數字直接顯示，沒有動畫類別 */}
+                                <p className="text-5xl font-extrabold text-blue-700 mb-3"> {/* 調整數字顏色 */}
+                                    {generatedCode}
+                                </p>
+                                <p className="text-2xl text-gray-700 mb-6">
+                                    <span className="font-semibold">幸運數字：</span> {luckyNumber}
+                                </p>
+                            </>
+                        )}
+
+                        {/* 免責聲明 - 極度顯眼且措辭嚴謹 */}
+                        <p className="text-base font-bold text-red-600 mt-4 italic leading-snug mb-6"> {/* 調整字體大小和行高 */}
+                            【重要聲明】本工具僅為**純粹娛樂性質**的隨機數字生成器，所提供的任何「四位碼」與「幸運數字」均為**電腦隨機產生**，**不具有任何實際意義、預測功能或關聯性**。請勿將此隨機數字用於任何實際用途或決策。
+                        </p>
+
+                        {/* 再來一次按鈕 */}
+                        <button
+                            onClick={onTryAgain}
+                            className="w-full py-3 px-6 rounded-md text-white font-bold text-lg
+                                       bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition-all duration-200 ease-in-out
+                                       focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75"
+                        >
+                            再來一次！
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+
+        // 主應用程式組件
+        function App() {
+            // 按鈕的動態標語列表
+            const buttonTexts = [
+                '生成四位碼！',
+                '點我，看今天是什麼碼！',
+                '今日隨機碼！',
+                '探索隨機數字！',
+                '再點一次，新數字！',
+                '純粹隨機，點了再說！',
+                '數字驚喜，即刻揭曉！',
+                '隨機數字指引！'
+            ];
+
+            // 狀態變數：儲存生成的四位碼、幸運數字、載入狀態和錯誤訊息
+            const [generatedCode, setGeneratedCode] = useState(null); // 儲存四位碼
+            const [luckyNumber, setLuckyNumber] = useState(null); // 儲存幸運數字
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+            // 新增狀態變數：儲存當前按鈕的文字
+            const [currentButtonText, setCurrentButtonText] = useState(buttonTexts[0]);
+            // 新增狀態變數：控制 Modal 的開啟與關閉
+            const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+            // 隨機生成四位碼的函數
+            const generateRandomCode = () => {
+                setLoading(true);
+                setError(null);
+                // 不再關閉 Modal，因為 onTryAgain 會直接呼叫此函數並保持 Modal 開啟
+                // setIsModalOpen(false); // 移除此行
+
+                setTimeout(() => {
+                    try {
+                        const code = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+                        const number = Math.floor(Math.random() * 100) + 1;
+
+                        setGeneratedCode(code.toString());
+                        setLuckyNumber(number);
+
+                        const nextTextIndex = Math.floor(Math.random() * buttonTexts.length);
+                        setCurrentButtonText(buttonTexts[nextTextIndex]);
+
+                        setIsModalOpen(true); // 在成功生成後開啟 Modal (如果尚未開啟)
+
+                    } catch (err) {
+                        console.error("生成隨機碼時發生錯誤:", err);
+                        setError("生成隨機碼時發生錯誤，請重試。");
+                    } finally {
+                        setLoading(false);
+                    }
+                }, 800); // 縮短載入延遲，加快運行感
+            };
+
+            // 初始載入時設定按鈕文字
+            useEffect(() => {
+                setCurrentButtonText(buttonTexts[Math.floor(Math.random() * buttonTexts.length)]);
+            }, []);
+
+            return (
+                // 主容器：使用 Grid 佈局來實現三欄（左右廣告/保留區塊 + 中間內容）
+                // 簡化背景顏色
+                <div className="min-h-screen bg-subtle-gradient flex justify-center items-center p-4 font-inter">
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(320px,500px)_1fr] gap-4 lg:gap-8 w-full max-w-screen-xl">
+
+                        {/* 左側廣告區塊 */}
+                        <div className="hidden lg:flex items-center justify-center bg-white rounded-lg shadow-md p-4 border border-gray-200 flex-col text-center"> {/* 簡化樣式 */}
+                            <p className="text-sm font-bold text-gray-700 mb-2">
+                                廣告區塊 (左)
+                            </p>
+                            {/* Google AdSense 廣告位 - 請在此處插入您的廣告代碼 */}
+                            <div className="w-full h-48 bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 text-xs flex-grow"> {/* 簡化佔位符樣式 */}
+                                <p>Google AdSense 廣告位</p>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                                點擊我，或許有驚喜！
+                            </p>
+                        </div>
+
+                        {/* 中間主內容區塊 */}
+                        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-8 w-full text-center transform transition-shadow duration-300"> {/* 簡化陰影和邊框，移除 hover:scale-105 */}
+                            <h1 className="text-4xl font-extrabold text-gray-800 mb-6">
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-700"> {/* 調整標題漸層 */}
+                                    隨機四位碼生成器
+                                </span>
+                            </h1>
+
+                            <p className="text-lg text-gray-600 mb-8">
+                                準備好迎接今天的隨機數字了嗎？點擊按鈕，讓程式為你揭示一個純粹隨機的四位碼！
+                            </p>
+
+                            {/* 初始提示或錯誤訊息 (當 Modal 未開啟且沒有生成數字時顯示) */}
+                            {!generatedCode && !loading && !error && !isModalOpen && (
+                                <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200 text-gray-600">
+                                    <p>好奇心是探索數字的第一步！點擊按鈕，看看你今天的「隨機四位碼」是什麼？</p>
+                                </div>
+                            )}
+                            {error && !isModalOpen && ( // 錯誤訊息只在 Modal 未開啟時顯示
+                                <div className="mb-8 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                    <p className="font-semibold">錯誤：</p>
+                                    <p>{error}</p>
+                                </div>
+                            )}
+
+                            {/* 推薦按鈕 */}
+                            <button
+                                onClick={generateRandomCode}
+                                disabled={loading}
+                                className={`
+                                    w-full py-3 px-6 rounded-md text-white font-bold text-lg
+                                    transition-all duration-200 ease-in-out /* 加快過渡 */
+                                    ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:scale-98'} /* 簡化按鈕顏色和點擊效果 */
+                                    focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75
+                                `}
+                            >
+                                {loading ? (
+                                    <div className="flex items-center justify-center">
+                                        <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        載入中...
+                                    </div>
+                                ) : (
+                                    currentButtonText
+                                )}
+                            </button>
+                        </div>
+
+                        {/* 右側廣告區塊 */}
+                        <div className="hidden lg:flex items-center justify-center bg-white rounded-lg shadow-md p-4 border border-gray-200 flex-col text-center"> {/* 簡化樣式 */}
+                            <p className="text-sm font-bold text-gray-700 mb-2">
+                                廣告區塊 (右)
+                            </p>
+                            {/* Google AdSense 廣告位 - 請在此處插入您的廣告代碼 */}
+                            <div className="w-full h-48 bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 text-xs flex-grow"> {/* 簡化佔位符樣式 */}
+                                <p>Google AdSense 廣告位</p>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                                更多機會，點擊發掘！
+                            </p>
+                        </div>
+
+                    </div>
+                    {/* 渲染 Modal 彈出視窗 */}
+                    <RecommendationModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        generatedCode={generatedCode}
+                        luckyNumber={luckyNumber}
+                        onTryAgain={generateRandomCode}
+                    />
+                </div>
+            );
+        }
+
+        // 將 React App 渲染到 DOM 中
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
