@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>隨機四位碼生成器</title>
+    <!-- Google AdSense 主要載入腳本 -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4726297202613314"
+            crossorigin="anonymous"></script>
     <!-- 載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 載入 Google Fonts - Inter -->
@@ -100,7 +103,7 @@
                         )}
 
                         {/* 免責聲明 - 極度顯眼且措辭嚴謹 */}
-                        <p className="text-base font-bold text-red-600 mt-4 italic leading-snug mb-6"> {/* 調整字體大小和行高 */}
+                        <p className="text-lg font-extrabold text-red-700 mt-4 italic leading-snug mb-6"> {/* 調整字體大小和行高 */}
                             【重要聲明】本工具僅為**純粹娛樂性質**的隨機數字生成器，所提供的任何「四位碼」與「幸運數字」均為**電腦隨機產生**，**不具有任何實際意義、預測功能或關聯性**。請勿將此隨機數字用於任何實際用途或決策。
                         </p>
 
@@ -108,7 +111,8 @@
                         <button
                             onClick={onTryAgain}
                             className="w-full py-3 px-6 rounded-md text-white font-bold text-lg
-                                       bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition-all duration-200 ease-in-out
+                                       transition-all duration-300 ease-in-out
+                                       bg-blue-500 hover:bg-blue-600 active:bg-blue-700 active:scale-95 hover:shadow-lg active:shadow-inner
                                        focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-75"
                         >
                             再來一次！
@@ -148,8 +152,7 @@
             const generateRandomCode = () => {
                 setLoading(true);
                 setError(null);
-                // 不再關閉 Modal，因為 onTryAgain 會直接呼叫此函數並保持 Modal 開啟
-                // setIsModalOpen(false); // 移除此行
+                setIsModalOpen(false); // 每次點擊時先確保 Modal 關閉，以便重新開啟動畫
 
                 setTimeout(() => {
                     try {
@@ -162,7 +165,7 @@
                         const nextTextIndex = Math.floor(Math.random() * buttonTexts.length);
                         setCurrentButtonText(buttonTexts[nextTextIndex]);
 
-                        setIsModalOpen(true); // 在成功生成後開啟 Modal (如果尚未開啟)
+                        setIsModalOpen(true); // 在成功生成後開啟 Modal
 
                     } catch (err) {
                         console.error("生成隨機碼時發生錯誤:", err);
